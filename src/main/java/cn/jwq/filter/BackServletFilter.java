@@ -1,6 +1,5 @@
 package cn.jwq.filter;
 
-import javax.jws.WebService;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,10 +15,16 @@ public class BackServletFilter implements Filter {
         // 把ServletRequest,ServletResponse 强转成http类型的
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+        // 禁用浏览器缓存
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("pragma", "no-cache");
+        response.setDateHeader("expires", -1);
         // 请求资源名
         String uri =  request.getRequestURI();
-        // 如果是css,js文件不做处理,处理执行下一个过滤器
-        if (uri.endsWith(".js") || uri.endsWith(".css") || uri.endsWith(".jsp")) {
+        // 如果是css,js文件不做处理,执行下一个过滤器
+        System.out.println("请求地址----"+uri);
+        if (uri.startsWith("/static") || uri.endsWith(".jsp") || uri.endsWith(".html")) {
+            System.out.println("不处理地址----"+uri);
             filterChain.doFilter(request, response);
         }
         // 汉字转码
@@ -39,8 +44,6 @@ public class BackServletFilter implements Filter {
                     String servletPath = uri.substring(uri.indexOf("_") + 1, uri.lastIndexOf("_")) + "Servlet";
                     // 请求的方法名称
                     String method = uri.substring(uri.lastIndexOf("_") + 1);
-                    System.out.println(servletPath);
-                    System.out.println(method);
                     // 请求的方法名称放到 request 里
                     request.setAttribute("method", method);
                     request.getRequestDispatcher("/" + servletPath).forward(request, response);
@@ -52,8 +55,6 @@ public class BackServletFilter implements Filter {
         } else {
             request.getRequestDispatcher("/404.jsp").forward(request,response);
         }
-//        // 否则不做处理,处理执行下一个过滤器
-//        filterChain.doFilter(request, response);
     }
 
     /**

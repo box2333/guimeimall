@@ -28,21 +28,20 @@ public class BaseBackServlet extends HttpServlet {
         /*借助反射，调用对应的方法*/
         // 方法名
         String method = (String) req.getAttribute("method");
-        System.out.println(method);
         try {
             Method m = this.getClass().getMethod(method, javax.servlet.http.HttpServletRequest.class,
                     javax.servlet.http.HttpServletResponse.class);
             String redirect = m.invoke(this,req, resp).toString();
             /*根据方法的返回值，进行相应的客户端跳转，服务端跳转，或者仅仅是输出字符串*/
-            if(redirect.startsWith("@")) {
+            if(redirect.startsWith("f:")) {
                 // 进行客户端跳转
-                resp.sendRedirect(redirect.substring(1));
-            } else if(redirect.startsWith("%")) {
-                // 直接输出字符串
-                resp.getWriter().print(redirect.substring(1));
-            } else {
+                resp.sendRedirect(redirect.substring(2));
+            } else if(redirect.startsWith("s:")) {
                 // 进行服务端跳转
-                req.getRequestDispatcher(redirect).forward(req, resp);
+                req.getRequestDispatcher(redirect.substring(2)).forward(req, resp);
+            } else {
+                // 直接输出字符串
+                resp.getWriter().print(redirect);
             }
         } catch (NoSuchMethodException e) {
             // 没有请求的方法会到这里

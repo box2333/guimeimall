@@ -38,5 +38,5 @@
         <%@include file="../include/page.jsp"%>
     </div>
 </body>
-<script src="${pageContext.request.contextPath}/static_admin/js/classManagePage.js" type="text/javascript"></script>
+<script src="${pageContext.request.contextPath}/static/admin/js/classManagePage.js" type="text/javascript"></script>
 </html>

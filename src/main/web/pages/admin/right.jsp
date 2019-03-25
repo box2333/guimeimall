@@ -4,7 +4,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>无标题文档</title>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/static_admin/css/hcss.css" type="text/css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/static/admin/css/hcss.css" type="text/css" />
 </head>
 
 <body>
