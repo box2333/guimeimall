@@ -3,7 +3,7 @@ $(function () {
     // 文档加载成功调用ajax生成表格
     ajax("", 0);
 });
-
+// 按条件查询
 function select() {
     let name = $('#name').val();
     let cid = $('#cid').val();

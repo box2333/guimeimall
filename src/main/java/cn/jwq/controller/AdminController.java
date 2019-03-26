@@ -1,7 +1,9 @@
 package cn.jwq.controller;
 
 import cn.itcast.commons.CommonUtils;
+import cn.jwq.dao.BigClassDao;
 import cn.jwq.dao.CustomerDao;
+import cn.jwq.pojo.BigClass;
 import cn.jwq.pojo.Customer;
 import cn.jwq.util.Page;
 import com.alibaba.fastjson.JSON;
@@ -230,5 +232,171 @@ public class AdminController extends BaseBackServlet {
             }
         }
         return "true";
+    }
+
+    /**
+     * 查询大分类
+     * @param request 请求
+     * @param response 响应
+     * @return 返回
+     */
+    public String bigClass(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("bigClass-------------------------------->");
+        BigClassDao bigClassDao = new BigClassDao();
+        int start = Integer.parseInt(request.getParameter("start"));
+        Page page = new Page(start);
+        List<BigClass> bigClassList = null;
+        try {
+            bigClassList = bigClassDao.list(page.getStart(), page.getCount());
+            page.setTotal(bigClassDao.count());
+            if (bigClassList != null) {
+                // 转换json
+                StringBuilder json = new StringBuilder(JSON.toJSONString(bigClassList));
+                // 把分页对象添加到json里
+                json.insert(1, "{\"totalPage\":"+page.getTotalPage()+",\"total\":"+bigClassDao.count()+"},");
+                System.out.println("userManageServlet" + json);
+                return json.toString();
+            } else {
+                return "[{\"totalPage\":"+page.getTotalPage()+",\"total\":"+bigClassDao.count()+"}]";
+            }
+        } catch (SQLException e) {
+            System.out.println("bigClassList查询失败----------------------"+bigClassList);
+            return "f:404.jsp";
+        }
+    }
+
+    /**
+     * 查询大分类是否存在
+     * @param request 请求
+     * @param response 响应
+     * @return 是否存在
+     */
+    public String selectBigName(HttpServletRequest request, HttpServletResponse response) {
+        String bigName = request.getParameter("bigName");
+        BigClassDao bigClassDao = new BigClassDao();
+        try {
+            if (bigClassDao.getId(bigName) == 1 ) {
+                return "false";
+            }
+        } catch (SQLException e) {
+            System.out.println("bigName=================");
+            return "false";
+        }
+        return "true";
+    }
+
+    /**
+     * 添加一个大分类
+     * @param request 请求
+     * @param response 响应
+     * @return 成功否
+     */
+    public String bigClassAdd(HttpServletRequest request, HttpServletResponse response) {
+        BigClassDao bigClassDao = new BigClassDao();
+        // 把from表单数据封装成一个对象
+        BigClass bigClass = CommonUtils.toBean(request.getParameterMap(), BigClass.class);
+        // 判断是否传过来值
+        if (bigClass.getBigName() != null) {
+            try {
+                bigClassDao.add(bigClass);
+                return "true";
+            } catch (SQLException e) {
+                return "false";
+            }
+        }
+        return "false";
+    }
+
+    /**
+     * 根据id去删除大分类
+     * @param request 请求
+     * @param response 响应
+     * @return 成功否
+     */
+    public String bigClassDelete(HttpServletRequest request, HttpServletResponse response) {
+        BigClassDao bigClassDao = new BigClassDao();
+        String[] sid = request.getParameter("idArray").split(",");
+        for (String aSid : sid) {
+            try {
+                bigClassDao.delete(Integer.parseInt(aSid));
+            } catch (SQLException e) {
+                System.out.println("删除失败");
+            }
+        }
+        return "true";
+    }
+
+    /**
+     * 根据条件查找大分类
+     * @param request 请求
+     * @param response 响应
+     * @return 结果集
+     */
+    public String bigClassSelect(HttpServletRequest request, HttpServletResponse response) {
+        String bigName = request.getParameter("bigName");
+        BigClassDao bigClassDao = new BigClassDao();
+        List<BigClass> bigClassList;
+        Page page = new Page(Integer.parseInt(request.getParameter("start")));
+        try {
+             bigClassList = bigClassDao.list(bigName, page.getStart(), page.getCount());
+             if (bigClassList != null) {
+                 page.setTotal(bigClassDao.list(bigName, page.getStart(), Short.MAX_VALUE).size());
+                 // 转换json
+                 StringBuilder json = new StringBuilder(JSON.toJSONString(bigClassList));
+                 // 把分页对象添加到json里
+                 json.insert(1, "{\"totalPage\":"+page.getTotalPage()+",\"total\":"+bigClassDao.count()+"},");
+                 return json.toString();
+             } else {
+                 return "[{\"totalPage\":"+page.getTotalPage()+",\"total\":"+0+"}]";
+             }
+        } catch (SQLException e) {
+            System.out.println("bigClassDao------------------------->SQL异常");
+            return "";
+        }
+    }
+
+    /**
+     * 查找单个BigClass
+     * @param request 请求
+     * @param response 响应
+     * @return 返回BigClass
+     */
+    public String bigClassEdit(HttpServletRequest request, HttpServletResponse response) {
+        BigClassDao bigClassDao = new BigClassDao();
+        BigClass bigClass = new BigClass();
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            bigClass = bigClassDao.getBigClass(id);
+            request.setAttribute("bigClass", bigClass);
+        } catch (Exception e) {
+            // 不带参访问,跳转404
+            return "f:404.jsp";
+        }
+        return "s:/pages/admin/href/bigClassUpdate.jsp";
+    }
+
+    public String bigClassUpdate(HttpServletRequest request, HttpServletResponse response) {
+        BigClassDao bigClassDao = new BigClassDao();
+        try {
+            System.out.println("bigClassUpdate--------------------->");
+            // 获取前台数据,封装成对象
+            BigClass fBigClass = CommonUtils.toBean(request.getParameterMap(), BigClass.class);
+            System.out.println("前台数据------>"+fBigClass);
+            // 根据id获取未修改数据
+            BigClass sBigClass = bigClassDao.getBigClass(fBigClass.getId());
+            System.out.println("后台数据------>"+sBigClass);
+            // 如果分类名相同直接去修改, 或者改分类名没有占用
+            if (fBigClass.getBigName().equals(sBigClass.getBigName()) ||
+                    bigClassDao.count(fBigClass.getBigName()) < 1) {
+                bigClassDao.updateCustomer(fBigClass);
+                return "true";
+            } else {
+                // 用户名不同,去判断新用户名是否被占用
+                return "name";
+            }
+        } catch (Exception e) {
+            System.out.println("添加用户发生了异常");
+            return "false";
+        }
     }
 }
