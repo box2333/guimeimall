@@ -2,7 +2,6 @@ package cn.jwq.dao;
 
 import cn.jwq.pojo.Customer;
 import cn.jwq.util.DBUtil;
-import com.alibaba.fastjson.JSON;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;

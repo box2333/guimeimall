@@ -84,7 +84,7 @@ public class AdminController extends BaseBackServlet {
             } else {
                 customerList = customerDao.list(name, sex, id, page.getStart(), page.getCount());
                 // 获取总记录数
-                page.setTotal(customerList.size());
+                page.setTotal(customerDao.list(name, sex, id, 0, Short.MAX_VALUE).size());
             }
             if (!customerList.isEmpty()) {
                 // 转换json
