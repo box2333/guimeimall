@@ -73,7 +73,7 @@ function ajax(name, pageNum, u) {
                     pageCount : p.totalPage,	// 总页数
                     currentPage : currentPage,// 默认选中第几页
                     isShowJumpPage : true,	// 是否显示跳页
-                    totalNum : 10,		// 总条数，不填时，不显示
+                    // totalNum : p.totalPage*10,		// 总条数，不填时，不显示
                     position : "center",
                     callback : function(rtn) {
                         console.log("当前选中的页数：" + rtn.pageNum);

@@ -12,9 +12,13 @@ import lombok.ToString;
 @ToString
 @Setter
 @Getter
-public class Smallclass {
+public class SmallClass {
     private Integer id;
     private String smallName;
     private Integer smallBigId;
     private String smallText;
+    /**
+     * 非数据库字段属性
+     */
+    private BigClass bigClass;
 }

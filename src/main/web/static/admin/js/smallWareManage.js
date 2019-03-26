@@ -1,14 +1,18 @@
-// 后台大分类管理分页js
+// 后台小分类管理分页js
 $(function () {
     // 文档加载成功调用ajax生成表格
     ajax(0);
 });
 // 按条件查询
 function select() {
-    let bigName = $('#name').val();
-    let url = "/admin_admin_bigClassSelect?";
-    if (bigName !== "" && bigName !== undefined) {
-        url += "bigName="+bigName+"&";
+    let bigNameId = $('#select').val();
+    let smallName = $('#name').val();
+    let url = "/admin_admin_smallClassSelect?";
+    if (bigNameId !== "" && bigNameId !== undefined) {
+        url += "bigNameId="+bigNameId+"&";
+    }
+    if (smallName !== "" && smallName !== undefined) {
+        url += "smallName="+smallName+"&";
     }
     if (url[url.length-1] === "?") {
         javaex.message({
@@ -29,7 +33,7 @@ function ajax(pageNum, u) {
         pageNum = 0;
     // 声明url, 是否是查询
     let p = {}
-        ,url = "/admin_admin_bigClass?start="+pageNum;
+        ,url = "/admin_admin_smallClass?start="+pageNum;
     if (u !== undefined && u !== "") {
         url = u+"&start="+pageNum;
     }
@@ -49,7 +53,8 @@ function ajax(pageNum, u) {
                     $('#tbody').append("<tr>\n" +
                         "<td class=\"checkbox\"><input type=\"checkbox\" class=\"fill listen-1-2\" value='"+data[i].id+"'/> </td>\n" +
                         "                    <td>" + data[i].id + "</td>\n" +
-                        "                    <td>" + data[i].bigName + "</td>\n" +
+                        "                    <td>" + data[i].smallName + "</td>\n" +
+                        "                    <td>" + data[i].bigClass.bigName + "</td>\n" +
                         "<td><button class=\"button green\" onclick='edit(" + data[i].id + ")'>编辑</button><button class=\"button red\" onclick='dele(" + data[i].id + ")'>删除</button></td>\n" +
                         "                </tr>");
                 }
@@ -67,7 +72,7 @@ function ajax(pageNum, u) {
                         console.log("当前选中的页数：" + rtn.pageNum);
                         console.log("每页显示条数：" + rtn.perPageCount);
                         // 点击分页控件触发的方法
-                        ajax(rtn.pageNum);
+                        ajax(rtn.pageNum, u);
                     }
                 });
             } else {
@@ -83,26 +88,26 @@ function ajax(pageNum, u) {
     });
 }
 
-// 添加一个大分类
+// 添加一个小分类
 function add() {
     javaex.dialog({
         type : "window",
-        title: "添加大分类",
+        title: "添加小分类",
         id : "add",	// 指定id，仅当页面存在多个弹出层，需要关闭指定弹出层时才使用
-        url : "/pages/admin/href/bigClassAdd.jsp",	// 页面地址或网址或请求地址
+        url : "/pages/admin/href/smallClassAdd.jsp",	// 页面地址或网址或请求地址
         width : "800",	// 弹出层宽度
         height : "500",	// 弹出层高度
         isClickMaskClose: true,
     });
 }
 
-// 修改大分类
+// 修改小分类
 function edit(id) {
     javaex.dialog({
         type : "window",
-        title: "修改用户",
+        title: "修改小分类",
         id : "add",	// 指定id，仅当页面存在多个弹出层，需要关闭指定弹出层时才使用
-        url : "/admin_admin_bigClassEdit?id="+id,	// 页面地址或网址或请求地址
+        url : "/admin_admin_smallClassEdit?id="+id,	// 页面地址或网址或请求地址
         width : "800",	// 弹出层宽度
         height : "500",	// 弹出层高度
         isClickMaskClose: true
@@ -152,7 +157,7 @@ function deleteUsers(obj, id) {
 
 function callback(idArray) {
     $.ajax({
-        url: "/admin_admin_bigClassDelete?idArray="+idArray.toString(),
+        url: "/admin_admin_smallClassDelete?idArray="+idArray.toString(),
         type: "post",
         async: false,
         dataType: "text",
@@ -165,3 +170,31 @@ function callback(idArray) {
     // 如果你想阻止弹出层关闭，直接 return false; 即可
     //return false;
 }
+
+// 显示大分类下拉列表
+$(function () {
+    $.ajax({
+        url: "/admin_admin_bigClassName",
+        type: "POST",
+        async: false,
+        dataType: "json",
+        success: function (big) {
+            console.log(big);
+            $("#select").empty();
+            let html = '<option value="">请选择大分类</option>';
+            for (let d in big) {
+                html += '<option value="'+big[d].id+'">'+big[d].bigName+'</option>';
+            }
+            $("#select").append(html);
+            javaex.select({
+                id: "select",
+            });
+        },
+        error: function () {
+            javaex.optTip({
+                content : "查询下拉列表失败,请刷新",
+                type : "error"
+            });
+        }
+    });
+});

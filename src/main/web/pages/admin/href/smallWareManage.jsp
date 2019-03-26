@@ -1,26 +1,49 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>无标题文档</title>
-    <link rel="stylesheet" href="/static_admin/css/hcss.css" type="text/css" />
-</head>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@include file="../include/head.jsp"%>
 
 <body>
-    <h4 class="h4">商品小分类管理</h4>
-    <hr class="hr" size="4" color="#FF8239" />
-    <table class="tablebox">
+<h4 class="h4">小分类管理</h4>
+<hr class="hr" size="4" color="#FF8239" />
+<%-- 表格 --%>
+<div class="main">
+    <!--表格上方的搜索操作-->
+    <div class="admin-search">
+        <div class="input-group">
+            <!--下拉选择框-->
+            <span>大分类：</span>
+            <select id="select">
+
+            </select>
+            <input type="text" id="name" class="text" placeholder="分类名称" />
+            <button class="button blue" onclick="select()">搜索</button>
+        </div>
+    </div>
+
+    <!--表格上方的操作元素，添加、删除等-->
+    <div class="operation-wrap">
+        <div class="buttons-wrap">
+            <button class="button blue radius-3" onclick="add()"><span class="icon-plus"></span> 添加</button>
+            ---------------
+            <button class="button red radius-3" onclick="deleteUsers(this, 'delete')"><span class="icon-close2"></span> 删除</button>
+        </div>
+    </div>
+    <table id="table" class="table color2  th-center td-center">
         <thead>
-            <tr><th>编号</th><th>商品小类别</th><th>所属大类别</th><th>操作</th></tr>
+        <tr>
+            <th class="checkbox"><input type="checkbox" class="fill listen-1" /> </th>
+            <th>id</th>
+            <th>商品小分类</th>
+            <th>商品所属大分类</th>
+            <th>操作</th>
+        </tr>
         </thead>
-        <tbody>
-            <tr><td></td><td>大家电</td><td>家用电器</td><td class="tdright">修改 删除</td></tr>
+        <tbody id="tbody">
+
         </tbody>
-        <tfoot>
-            <tr align="right"><td colspan="4">1 2 3</td></tr>
-        </tfoot>
     </table>
-                                                                                            
+    <%@include file="../include/page.jsp"%>
+</div>
 </body>
+<script src="${pageContext.request.contextPath}/static/admin/js/smallWareManage.js" type="text/javascript"></script>
 </html>

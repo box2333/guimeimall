@@ -3,8 +3,10 @@ package cn.jwq.controller;
 import cn.itcast.commons.CommonUtils;
 import cn.jwq.dao.BigClassDao;
 import cn.jwq.dao.CustomerDao;
+import cn.jwq.dao.SmallClassDao;
 import cn.jwq.pojo.BigClass;
 import cn.jwq.pojo.Customer;
+import cn.jwq.pojo.SmallClass;
 import cn.jwq.util.Page;
 import com.alibaba.fastjson.JSON;
 
@@ -12,9 +14,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author jia
@@ -275,7 +275,7 @@ public class AdminController extends BaseBackServlet {
         String bigName = request.getParameter("bigName");
         BigClassDao bigClassDao = new BigClassDao();
         try {
-            if (bigClassDao.getId(bigName) == 1 ) {
+            if (bigClassDao.isName(bigName) == 1 ) {
                 return "false";
             }
         } catch (SQLException e) {
@@ -356,6 +356,23 @@ public class AdminController extends BaseBackServlet {
     }
 
     /**
+     * 查找所有大分类名称
+     * @param request 请求
+     * @param response 响应
+     * @return 结果集
+     */
+    public String bigClassName(HttpServletRequest request, HttpServletResponse response) {
+        BigClassDao bigClassDao = new BigClassDao();
+        // 转换json
+        try {
+            return JSON.toJSONString(bigClassDao.getBigName());
+        } catch (SQLException e) {
+            System.out.println("查找所有大分类名称");
+        }
+        return "false";
+    }
+
+    /**
      * 查找单个BigClass
      * @param request 请求
      * @param response 响应
@@ -375,6 +392,12 @@ public class AdminController extends BaseBackServlet {
         return "s:/pages/admin/href/bigClassUpdate.jsp";
     }
 
+    /**
+     * 更新bigClass
+     * @param request 请求
+     * @param response 响应
+     * @return 成功否
+     */
     public String bigClassUpdate(HttpServletRequest request, HttpServletResponse response) {
         BigClassDao bigClassDao = new BigClassDao();
         try {
@@ -397,6 +420,207 @@ public class AdminController extends BaseBackServlet {
         } catch (Exception e) {
             System.out.println("添加用户发生了异常");
             return "false";
+        }
+    }
+
+    /**
+     * 查询小分类
+     * @param request 请求
+     * @param response 响应
+     * @return 结果集
+     */
+    public String smallClass(HttpServletRequest request, HttpServletResponse response) {
+        System.out.println("smallClass-------------------------------->");
+        SmallClassDao smallClassDao = new SmallClassDao();
+        int start = Integer.parseInt(request.getParameter("start"));
+        Page page = new Page(start);
+        List<SmallClass> smallClassList = null;
+        try {
+            smallClassList = smallClassDao.list(page.getStart(), page.getCount());
+            page.setTotal(smallClassDao.count());
+            if (smallClassList != null) {
+                // 转换json
+                StringBuilder json = new StringBuilder(JSON.toJSONString(smallClassList));
+                // 把分页对象添加到json里
+                json.insert(1, "{\"totalPage\":"+page.getTotalPage()+",\"total\":"+smallClassDao.count()+"},");
+                System.out.println("smallClass--->" + json);
+                return json.toString();
+            } else {
+                return "[{\"totalPage\":"+page.getTotalPage()+",\"total\":"+smallClassDao.count()+"}]";
+            }
+        } catch (SQLException e) {
+            System.out.println("bigClassList查询失败----------------------"+smallClassList);
+            return "f:404.jsp";
+        }
+    }
+
+    /**
+     * 查询小分类是否存在
+     * @param request 请求
+     * @param response 响应
+     * @return 是否存在
+     */
+    public String selectSmallName(HttpServletRequest request, HttpServletResponse response) {
+        String smallName = request.getParameter("smallName");
+        SmallClassDao smallClassDao = new SmallClassDao();
+        try {
+            if (smallClassDao.isName(smallName) == 1 ) {
+                return "false";
+            }
+        } catch (SQLException e) {
+            System.out.println("selectSmallName=================");
+            return "false";
+        }
+        return "true";
+    }
+
+    /**
+     * 添加一个小分类
+     * @param request 请求
+     * @param response 响应
+     * @return 成功否
+     */
+    public String smallNameAdd(HttpServletRequest request, HttpServletResponse response) {
+        SmallClassDao smallClassDao = new SmallClassDao();
+        BigClassDao bigClassDao = new BigClassDao();
+        String smallName = request.getParameter("smallName");
+        try {
+            // 判断是否已经存在
+            if (smallClassDao.isName(smallName) == 0) {
+                String bigNameId = request.getParameter("select");
+                String smallText = request.getParameter("smallText");
+                // 获取对应的bigClassId
+                int bigId = Integer.parseInt(bigNameId);
+                // 创建SmallClass对象
+                SmallClass smallClass = new SmallClass();
+                smallClass.setSmallBigId(bigId);
+                smallClass.setSmallName(smallName);
+                smallClass.setSmallText(smallText);
+                // 存数据库
+                smallClassDao.add(smallClass);
+                return "true";
+            } else {
+                return "name";
+            }
+        } catch (SQLException e) {
+            return "false";
+        }
+    }
+
+    /**
+     * 删除一个小分类
+     * @param request 请求
+     * @param response 响应
+     * @return 成功否
+     */
+    public String smallClassDelete(HttpServletRequest request, HttpServletResponse response) {
+        SmallClassDao smallClassDao = new SmallClassDao();
+        System.out.println("smallClassDelete--------------------------->");
+        String[] sid = request.getParameter("idArray").split(",");
+        System.out.println(sid);
+        for (String aSid : sid) {
+            try {
+                System.out.println(aSid);
+                smallClassDao.delete(Integer.parseInt(aSid));
+            } catch (SQLException e) {
+                System.out.println("删除失败");
+                return "false";
+            }
+        }
+        return "true";
+    }
+
+    /**
+     * 查找一个小分类
+     * @param request 请求
+     * @param response 响应
+     * @return 服务器跳转
+     */
+    public String smallClassEdit(HttpServletRequest request, HttpServletResponse response) {
+        SmallClassDao smallClassDao = new SmallClassDao();
+        BigClassDao bigClassDao = new BigClassDao();
+        SmallClass smallClass = new SmallClass();
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            smallClass = smallClassDao.getSmallClass(id);
+            // 根据小分类取大分类
+            smallClass.setBigClass(bigClassDao.getBigClass(smallClass.getSmallBigId()));
+            request.setAttribute("smallClass", smallClass);
+        } catch (Exception e) {
+            // 不带参访问,跳转404
+            return "f:404.jsp";
+        }
+        return "s:/pages/admin/href/smallUpdate.jsp";
+    }
+
+    /**
+     * 更新小分类
+     * @param request 请求
+     * @param response 响应
+     * @return 成功否
+     */
+    public String smallUpdate(HttpServletRequest request, HttpServletResponse response) {
+        SmallClassDao smallClassDao = new SmallClassDao();
+        try {
+            System.out.println("smallUpdate--------------------->");
+            // 获取前台数据,封装成对象
+            SmallClass fSmallClass = CommonUtils.toBean(request.getParameterMap(), SmallClass.class);
+            System.out.println("前台数据------>"+fSmallClass);
+            // 根据id获取未修改数据
+            SmallClass sSmallClass = smallClassDao.getSmallClass(fSmallClass.getId());
+            System.out.println("后台数据------>"+sSmallClass);
+            // 如果分类名相同直接去修改, 或者改分类名没有占用
+            if (fSmallClass.getSmallName().equals(sSmallClass.getSmallName()) ||
+                    smallClassDao.count(fSmallClass.getSmallName()) < 1) {
+                smallClassDao.updateCustomer(fSmallClass);
+                return "true";
+            } else {
+                // 用户名不同,去判断新用户名是否被占用
+                return "name";
+            }
+        } catch (Exception e) {
+            System.out.println("添加小分类发生了异常");
+            return "false";
+        }
+    }
+
+    /**
+     * 按照条件查询小分类
+     * @param request 请求
+     * @param response 响应
+     * @return 异常
+     */
+    public String smallClassSelect(HttpServletRequest request, HttpServletResponse response) {
+        SmallClassDao smallClassDao = new SmallClassDao();
+        List<SmallClass> smallClassList;
+        String bigNameId = null;
+        String smallName = null;
+        int start = Integer.parseInt(request.getParameter("start"));
+        Page page = new Page(start);
+        try {
+            bigNameId = request.getParameter("bigNameId");
+            smallName = request.getParameter("smallName");
+        } catch (Exception e) {
+            System.out.println("取值异常,不管");
+        }
+        try {
+            smallClassList = smallClassDao.list(smallName, bigNameId, page.getStart(), page.getCount());
+            // 获取总记录数
+            page.setTotal(smallClassDao.list(smallName, bigNameId, 0, Short.MAX_VALUE).size());
+            if (!smallClassList.isEmpty()) {
+                // 转换json
+                System.out.println(smallClassList);
+                StringBuilder json = new StringBuilder(JSON.toJSONString(smallClassList));
+                // 把分页对象添加到json里
+                json.insert(1, "{\"totalPage\":"+page.getTotalPage()+",\"total\":"+page.getTotal()+"},");
+                System.out.println("userManageServlet" + json);
+                return json.toString();
+            } else {
+                return "[{\"totalPage\":"+page.getTotalPage()+",\"total\":"+page.getTotal()+"}]";
+            }
+        } catch (SQLException e) {
+            System.out.println("----------------->smallClassSelect的SQL异常");
+            return "";
         }
     }
 }

@@ -14,6 +14,5 @@ public class Test {
         Map ma = new HashMap();
         ma.put("qq", "qqq");
         System.out.println(Integer.parseInt("null"));
-
     }
 }
