@@ -172,6 +172,11 @@ public class SmallClassDao {
         qr.update(sql, params);
     }
 
+    public List<SmallClass> getSmallName() throws SQLException {
+        String sql = "select smallName,id from smallclass";
+        return qr.query(sql, new BeanListHandler<SmallClass>(SmallClass.class));
+    }
+
     public static void main(String[] args) throws SQLException {
         SmallClassDao smallClassDao = new SmallClassDao();
         System.out.println(smallClassDao.list("电", null, 0, 100));

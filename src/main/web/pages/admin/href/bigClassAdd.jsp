@@ -128,7 +128,7 @@
 
     function selectBigName(bigName) {
         $.ajax({
-            url: "/admin_admin_selectBigName",
+            url: "/admin_admin_bigNameSelect",
             type: "POST",
             data: "bigName="+bigName,
             async: false,

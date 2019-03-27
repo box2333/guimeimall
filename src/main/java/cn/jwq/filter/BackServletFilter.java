@@ -1,5 +1,8 @@
 package cn.jwq.filter;
 
+import cn.jwq.pojo.Admin;
+import cn.jwq.pojo.Customer;
+
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,6 +31,7 @@ public class BackServletFilter implements Filter {
             filterChain.doFilter(request, response);
         }
         // 汉字转码
+        request.setCharacterEncoding("utf-8");
         response.setCharacterEncoding("utf-8");
         // 个人认为请求资源名"/a_a_a",最少要大于6
         int length = 6;
@@ -39,7 +43,13 @@ public class BackServletFilter implements Filter {
         if (uri.length() > length) {
             try {
                 // 判断应该转发到哪里去
-                if (uri.startsWith(admin) || uri.startsWith(user)) {
+                if (uri.startsWith(admin)) {
+                    // 判断管理员是否登陆
+                    Admin attribute = (Admin) request.getSession().getAttribute("admin");
+                    if (attribute == null && !uri.endsWith("login")) {
+                        response.sendRedirect("/pages/admin/login.jsp");
+                        return;
+                    }
                     // 请求的Servlet
                     String servletPath = uri.substring(uri.indexOf("_") + 1, uri.lastIndexOf("_")) + "Servlet";
                     // 请求的方法名称
@@ -47,6 +57,9 @@ public class BackServletFilter implements Filter {
                     // 请求的方法名称放到 request 里
                     request.setAttribute("method", method);
                     request.getRequestDispatcher("/" + servletPath).forward(request, response);
+                } else if (uri.startsWith(user)) {
+                    // 判断用户是否登陆
+                    Customer attribute = (Customer) request.getSession().getAttribute("customer");
                 }
             } catch (StringIndexOutOfBoundsException e) {
                 // 请求的Servlet 与 请求的方法名称 不对转向404

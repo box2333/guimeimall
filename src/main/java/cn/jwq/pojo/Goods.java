@@ -22,4 +22,8 @@ public class Goods {
     private Double goodsCarriage;
     private Integer goodsType;
     private Integer goodsDiscId;
+    /**
+     * 非数据库属性
+     */
+    private SmallClass smallClass;
 }

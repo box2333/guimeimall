@@ -163,7 +163,7 @@
 
     function selectSmallName(smallName) {
         $.ajax({
-            url: "/admin_admin_selectSmallName",
+            url: "/admin_admin_smallNameSelect",
             type: "POST",
             data: "smallName="+smallName,
             async: false,
